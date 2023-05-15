@@ -152,7 +152,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   Future<bool> fetchAndActivate() async {
     final isConnected = await CheckConnectivity.isConnected();
     if (isConnected) {
-      _socketException('socket', StackTrace.current);
+      throw _socketException('socket', StackTrace.current);
     }
     try {
       bool? configChanged = await channel.invokeMethod<bool>(
@@ -241,7 +241,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   ) async {
     final isConnected = await CheckConnectivity.isConnected();
     if (isConnected) {
-      _socketException('socket', StackTrace.current);
+      throw _socketException('socket', StackTrace.current);
     }
 
     try {
