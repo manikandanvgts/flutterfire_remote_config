@@ -237,8 +237,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   ) async {
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
-      _socketException('socket');
-      return;
+      _socketException('socket', StackTrace.current);
     }
     try {
       await channel
@@ -254,13 +253,15 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     }
   }
 
-  FirebaseException _socketException(String exception) {
+  Never _socketException(String exception, StackTrace stackTrace) {
     socketException = exception;
-    return FirebaseException(
-      plugin: 'firebase_remote_config',
-      code: 'Socket Exception',
-      message: 'Internet is not connected',
-    );
+    return Error.throwWithStackTrace(
+        FirebaseException(
+          plugin: 'firebase_remote_config',
+          code: 'Socket Exception',
+          message: 'Internet is not connected',
+        ),
+        stackTrace);
   }
 
   @override
