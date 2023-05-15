@@ -5,6 +5,7 @@
 // ignore_for_file: require_trailing_commas
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -234,6 +235,11 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   Future<void> setConfigSettings(
     RemoteConfigSettings remoteConfigSettings,
   ) async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      _socketException('socket');
+      return;
+    }
     try {
       await channel
           .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
@@ -244,29 +250,17 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
       });
       await _updateConfigProperties();
     } catch (exception, stackTrace) {
-      platformExceptionToFirebaseException(exception);
       convertPlatformException(exception, stackTrace);
     }
   }
 
-  void platformExceptionToFirebaseException(Object exception) {
-    if (exception is! PlatformException) return;
-    final platformException = exception;
-    Map<String, Object>? details = platformException.details != null
-        ? Map<String, Object>.from(platformException.details)
-        : null;
-
-    String? code;
-    String message = platformException.message ?? '';
-
-    if (details != null) {
-      code = (details['code'] as String?) ?? code;
-      message = (details['message'] as String?) ?? message;
-      if (code != null && code == 'socket') {
-        socketException = code;
-      }
-      debugPrint('code $code, message $message');
-    }
+  FirebaseException _socketException(String exception) {
+    socketException = exception;
+    return FirebaseException(
+      plugin: 'firebase_remote_config',
+      code: 'Socket Exception',
+      message: 'Internet is not connected',
+    );
   }
 
   @override
