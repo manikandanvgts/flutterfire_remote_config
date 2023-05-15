@@ -194,8 +194,8 @@ public class FirebaseRemoteConfigPlugin
           } else {
             Exception exception = task.getException();
             Map<String, Object> details = new HashMap<>();
+            System.out.println("Socket Exception:" + exception);
             if (exception instanceof java.net.SocketException || exception instanceof java.net.SocketTimeoutException) {
-              System.out.println("Socket Exception :" + exception);
               details.put("code", "socket");
               details.put("message", "internet is not connected");
             } else if (exception instanceof FirebaseRemoteConfigFetchThrottledException) {
