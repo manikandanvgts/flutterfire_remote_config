@@ -6,7 +6,9 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../firebase_remote_config_platform_interface.dart';
 import 'utils/exception.dart';
@@ -47,6 +49,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   late RemoteConfigSettings _settings;
   late DateTime _lastFetchTime;
   late RemoteConfigFetchStatus _lastFetchStatus;
+  String? socketException;
 
   /// Gets a [FirebaseRemoteConfigPlatform] instance for a specific
   /// [FirebaseApp].
@@ -192,10 +195,31 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
 
   @override
   String getString(String key) {
+    if (socketException != null && socketException == 'socket') {
+      String prefValues = '';
+      _getPrefsValues().then((value) {
+        prefValues = value;
+      });
+      return prefValues;
+    }
     if (!_activeParameters.containsKey(key)) {
       return RemoteConfigValue.defaultValueForString;
     }
-    return _activeParameters[key]!.asString();
+    final value = _activeParameters[key]!.asString();
+    if (value.isNotEmpty) _saveToLocal(value);
+    return value;
+  }
+
+  Future<void> _saveToLocal(String value) async {
+    final pref = await SharedPreferences.getInstance();
+    final isSaved = await pref.setString('remote-config', value);
+
+    debugPrint('new Value $isSaved');
+  }
+
+  Future<String> _getPrefsValues() async {
+    final pref = await SharedPreferences.getInstance();
+    return pref.getString('remote-config') ?? '';
   }
 
   @override
@@ -220,7 +244,28 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
       });
       await _updateConfigProperties();
     } catch (exception, stackTrace) {
+      platformExceptionToFirebaseException(exception);
       convertPlatformException(exception, stackTrace);
+    }
+  }
+
+  void platformExceptionToFirebaseException(Object exception) {
+    if (exception is! PlatformException) return;
+    final platformException = exception;
+    Map<String, Object>? details = platformException.details != null
+        ? Map<String, Object>.from(platformException.details)
+        : null;
+
+    String? code;
+    String message = platformException.message ?? '';
+
+    if (details != null) {
+      code = (details['code'] as String?) ?? code;
+      message = (details['message'] as String?) ?? message;
+      if (code != null && code == 'socket') {
+        socketException = code;
+      }
+      debugPrint('code $code, message $message');
     }
   }
 
