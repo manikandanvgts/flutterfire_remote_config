@@ -5,13 +5,13 @@
 // ignore_for_file: require_trailing_commas
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../firebase_remote_config_platform_interface.dart';
+import 'utils/check_connectivity.dart';
 import 'utils/exception.dart';
 
 /// Method Channel delegate for [FirebaseRemoteConfigPlatform].
@@ -150,6 +150,10 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
 
   @override
   Future<bool> fetchAndActivate() async {
+    final isConnected = await CheckConnectivity.isConnected();
+    if (isConnected) {
+      _socketException('socket', StackTrace.current);
+    }
     try {
       bool? configChanged = await channel.invokeMethod<bool>(
           'RemoteConfig#fetchAndActivate', <String, dynamic>{
@@ -235,10 +239,11 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   Future<void> setConfigSettings(
     RemoteConfigSettings remoteConfigSettings,
   ) async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
+    final isConnected = await CheckConnectivity.isConnected();
+    if (isConnected) {
       _socketException('socket', StackTrace.current);
     }
+
     try {
       await channel
           .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
