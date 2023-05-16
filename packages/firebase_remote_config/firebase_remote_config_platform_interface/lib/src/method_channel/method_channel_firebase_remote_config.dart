@@ -203,6 +203,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     if (socketException != null && socketException == 'socket') {
       String prefValues = '';
       _getPrefsValues().then((value) {
+        debugPrint('prefs Value : $value');
         prefValues = value;
       });
       return prefValues;
