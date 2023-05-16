@@ -215,9 +215,11 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     return value;
   }
 
+  /// new values only saved in preferences
   Future<void> _saveToLocal(String value) async {
+    if (value == _getPrefsValues()) return;
     final isSaved = await preferencesUtils.setString('remote-config', value);
-    debugPrint('new Value $isSaved');
+    debugPrint('new Value saved : $isSaved');
   }
 
   String _getPrefsValues() {
