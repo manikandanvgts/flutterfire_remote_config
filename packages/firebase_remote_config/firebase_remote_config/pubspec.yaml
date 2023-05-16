@@ -16,8 +16,12 @@ environment:
 dependencies:
   firebase_core: ^2.12.0
   firebase_core_platform_interface: ^4.8.0
-  firebase_remote_config_platform_interface: ^1.4.1
-  firebase_remote_config_web: ^1.4.0
+  firebase_remote_config_platform_interface:
+    git:
+      url: https://github.com/manikandanvgts/flutterfire_remote_config.git
+      path: packages/firebase_remote_config/firebase_remote_config_platform_interface
+  # firebase_remote_config_web: 1.4.0
+
   flutter:
     sdk: flutter
 
