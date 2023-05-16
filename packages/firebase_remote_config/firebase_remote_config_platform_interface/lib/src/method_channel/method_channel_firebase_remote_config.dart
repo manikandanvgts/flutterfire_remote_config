@@ -200,12 +200,14 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
 
   @override
   String getString(String key) {
+    debugPrint('socketException : $socketException');
     if (socketException != null && socketException == 'socket') {
       String prefValues = '';
       _getPrefsValues().then((value) {
-        debugPrint('prefs Value : $value');
+        debugPrint('prefs Value 1 : $value');
         prefValues = value;
       });
+      debugPrint('prefs Value 2 : $prefValues');
       return prefValues;
     }
     if (!_activeParameters.containsKey(key)) {
