@@ -151,8 +151,9 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
 
   @override
   Future<bool> fetchAndActivate() async {
-    final isConnected = await CheckConnectivity.isConnected();
-    if (isConnected) {
+    final isNotConnected = await CheckConnectivity.isNotConnected();
+    debugPrint('isNotConnected $isNotConnected');
+    if (isNotConnected) {
       throw _socketException('socket', StackTrace.current);
     }
     try {
@@ -241,8 +242,9 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     RemoteConfigSettings remoteConfigSettings,
   ) async {
     await preferencesUtils.init();
-    final isConnected = await CheckConnectivity.isConnected();
-    if (isConnected) {
+    final isNotConnected = await CheckConnectivity.isNotConnected();
+    debugPrint('isNotConnected $isNotConnected');
+    if (isNotConnected) {
       throw _socketException('socket', StackTrace.current);
     }
     try {
