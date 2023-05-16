@@ -8,11 +8,11 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../firebase_remote_config_platform_interface.dart';
 import 'utils/check_connectivity.dart';
 import 'utils/exception.dart';
+import 'utils/preference_utils.dart';
 
 /// Method Channel delegate for [FirebaseRemoteConfigPlatform].
 class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
@@ -46,6 +46,7 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     return MethodChannelFirebaseRemoteConfig._();
   }
 
+  final preferencesUtils = PreferencesUtils();
   late Map<String, RemoteConfigValue> _activeParameters;
   late RemoteConfigSettings _settings;
   late DateTime _lastFetchTime;
@@ -202,12 +203,8 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   String getString(String key) {
     debugPrint('socketException : $socketException');
     if (socketException != null && socketException == 'socket') {
-      String prefValues = '';
-      _getPrefsValues().then((value) {
-        debugPrint('prefs Value 1 : $value');
-        prefValues = value;
-      });
-      debugPrint('prefs Value 2 : $prefValues');
+      String prefValues = _getPrefsValues();
+      debugPrint('prefs Value : $prefValues');
       return prefValues;
     }
     if (!_activeParameters.containsKey(key)) {
@@ -219,15 +216,14 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   }
 
   Future<void> _saveToLocal(String value) async {
-    final pref = await SharedPreferences.getInstance();
-    final isSaved = await pref.setString('remote-config', value);
-
+    final isSaved = await preferencesUtils.setString('remote-config', value);
     debugPrint('new Value $isSaved');
   }
 
-  Future<String> _getPrefsValues() async {
-    final pref = await SharedPreferences.getInstance();
-    return pref.getString('remote-config') ?? '';
+  String _getPrefsValues() {
+    final value = preferencesUtils.getString('remote-config');
+    debugPrint('value $value');
+    return value;
   }
 
   @override
@@ -242,11 +238,11 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   Future<void> setConfigSettings(
     RemoteConfigSettings remoteConfigSettings,
   ) async {
+    await preferencesUtils.init();
     final isConnected = await CheckConnectivity.isConnected();
     if (isConnected) {
       throw _socketException('socket', StackTrace.current);
     }
-
     try {
       await channel
           .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
