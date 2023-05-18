@@ -244,9 +244,9 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
     await preferencesUtils.init();
     final isNotConnected = await CheckConnectivity.isNotConnected();
     debugPrint('isNotConnected $isNotConnected');
-    if (isNotConnected) {
-      throw _socketException('socket', StackTrace.current);
-    }
+    // if (isNotConnected) {
+    //   throw _socketException('socket', StackTrace.current);
+    // }
     try {
       await channel
           .invokeMethod('RemoteConfig#setConfigSettings', <String, dynamic>{
