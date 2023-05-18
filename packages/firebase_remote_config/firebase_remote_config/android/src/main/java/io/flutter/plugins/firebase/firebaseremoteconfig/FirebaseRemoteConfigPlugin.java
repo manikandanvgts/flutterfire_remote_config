@@ -194,7 +194,9 @@ public class FirebaseRemoteConfigPlugin
           } else {
             Exception exception = task.getException();
             Map<String, Object> details = new HashMap<>();
-            System.out.println("Socket Exception : " + exception);
+            System.out.println("Exception: " + exception);
+            System.out.println("Exception Msg: " + exception.getMessage());
+            System.out.println("Exception Cause: " + exception.getCause());
             if (exception instanceof FirebaseRemoteConfigFetchThrottledException) {
               details.put("code", "throttled");
               details.put("message", "frequency of requests exceeds throttled limits");
