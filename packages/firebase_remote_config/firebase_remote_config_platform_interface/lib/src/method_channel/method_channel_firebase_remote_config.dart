@@ -153,9 +153,9 @@ class MethodChannelFirebaseRemoteConfig extends FirebaseRemoteConfigPlatform {
   Future<bool> fetchAndActivate() async {
     final isNotConnected = await CheckConnectivity.isNotConnected();
     debugPrint('isNotConnected $isNotConnected');
-    if (isNotConnected) {
-      throw _socketException('socket', StackTrace.current);
-    }
+    // if (isNotConnected) {
+    //   throw _socketException('socket', StackTrace.current);
+    // }
     try {
       bool? configChanged = await channel.invokeMethod<bool>(
           'RemoteConfig#fetchAndActivate', <String, dynamic>{
