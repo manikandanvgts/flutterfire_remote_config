@@ -16,6 +16,7 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -55,8 +56,8 @@ android {
     dependencies {
        api firebaseCoreProject
         implementation platform("com.google.firebase:firebase-bom:${getRootProjectExtOrCoreProperty("FirebaseSDKVersion", firebaseCoreProject)}")
-         implementation 'com.google.firebase:firebase-config'
-       // implementation 'com.github.manikandanvgts:firebase-android-sdk:firebase-config'
+        // implementation 'com.google.firebase:firebase-config'
+         implementation 'com.github.manikandanvgts:firebase-android-sdk:firebase-config:-SNAPSHOT' 
         implementation 'androidx.annotation:annotation:1.1.0'
     }
 }
